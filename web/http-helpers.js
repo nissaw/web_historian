@@ -1,5 +1,6 @@
 var path = require('path');
 var fs = require('fs');
+var url = require('url');
 var archive = require('../helpers/archive-helpers');
 
 exports.headers = headers = {
@@ -11,9 +12,34 @@ exports.headers = headers = {
 };
 
 exports.serveAssets = function(res, asset, callback) {
-  // Write some code here that helps serve up your static files!
-  // (Static files are things like html (yours or archived from others...),
-  // css, or anything that doesn't change often.)
+  var path = url.parse(asset).pathname;
+  if (path === '/'){
+    path = 'index.html';
+  }
+
+  if (path.substring(path.length - 4).toLowerCase() === 'html') {
+  
+    fs.readFile('web/public/' + path, function(error, contents) {
+      if (error) {
+        res.writeHead(404, headers);
+        res.end();
+      } else {
+        res.writeHead(200, headers);
+        res.end(contents);
+      }
+    });    
+  } else {
+    fs.readFile('web/public/' + path, function(error, contents) {
+      if (error) {
+        res.writeHead(404, headers);
+        res.end();
+      } else {
+        headers['Content-Type'] = 'text/css';
+        res.writeHead(200, headers);
+        res.end(contents);
+      }
+    });
+  }
 };
 
 

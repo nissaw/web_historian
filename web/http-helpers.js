@@ -17,8 +17,8 @@ exports.serveAssets = function(res, asset, callback) {
   if (path === '/'){
     path = '/index.html';
   }
-  console.log(path);
-  console.log(archive.paths.siteAssets + path); //TODO GET CSS (maybe because of headers)
+
+  // console.log(archive.paths.siteAssets + path); //TODO GET CSS (maybe because of headers)
 
   fs.readFile(archive.paths.siteAssets + path, encoding, function(error, contents){
     if (error){

@@ -32,7 +32,6 @@ exports.readListOfUrls = function(callback) {
     if (error) {
       //handle error
     } else {
-      console.log("Read");
       callback(content.split('\n'));
     }
   })

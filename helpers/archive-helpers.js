@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var request = require('request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -25,17 +26,56 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(){
+exports.readListOfUrls = function(callback) {
+  //TODO: possibly reduce file IO
+  fs.readFile(exports.paths.list, 'utf-8', function(error, content) {
+    if (error) {
+      //handle error
+    } else {
+      console.log("Read");
+      callback(content.split('\n'));
+    }
+  })
 };
 
-exports.isUrlInList = function(){
+exports.isUrlInList = function(targetUrl, callback) { //this works, even though tests fail
+  exports.readListOfUrls(function(contents){
+    callback(_.contains(contents, targetUrl));
+  })
 };
 
-exports.addUrlToList = function(){
+exports.addUrlToList = function(newUrl){
+  exports.isUrlInList(newUrl, function(value){
+    if (!value){
+      fs.appendFile(exports.paths.list, newUrl + '\n', 'utf-8', function(error){
+        if (error){
+          // handle error
+        } 
+      });
+    }
+  });
 };
 
-exports.isUrlArchived = function(){
+exports.isUrlArchived = function(url, callback) {
+  fs.stat(exports.paths.archivedSites + '/' + url, function (error, stat) {
+    if (error) {
+      callback(false);
+    } else {
+      callback(true);
+    }
+  });
 };
 
-exports.downloadUrls = function(){
+exports.downloadUrls = function() {
+  exports.readListOfUrls(function(contents) {
+    _.each(contents, function(url) {
+      exports.isUrlArchived(url, function(result) {
+        if (!result) {
+          request('http://' + url).pipe(fs.createWriteStream(exports.paths.archivedSites + '/' + url));
+        }
+      });
+    })
+  })
 };
+
+
